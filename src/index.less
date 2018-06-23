@@ -1,0 +1,80 @@
+body {
+    display: flex;
+    background-color: #eee;
+    box-sizing: border-box;
+    min-height: 100vh;
+    margin: 0;
+    padding: 15px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.Panel {
+    display: flex;
+    flex-direction: column;
+    width: 600px;
+    background-color: #fff;
+    min-height: 90vh;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 5px 5px 5px 0px rgba(0, 0, 0, 0.2);
+}
+
+.Header {
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 0;
+    border-bottom: 1px solid #ccc;
+    padding: 5px 15px;
+    text-align: center;
+}
+
+.List {
+    flex: 1 1 auto;
+    padding: 5px;
+}
+
+#no-items {
+    text-align: center;
+    color: #666;
+}
+
+.Task-Item {
+    display: flex;
+    flex-direction: row;
+}
+
+.Task-Name {
+    flex: 1 1 auto;
+}
+
+.New-Item {
+    flex: 0 0 auto;
+    padding: 15px 10px 10px 10px;
+    display: flex;
+    align-items: stretch;
+    border-top: 1px solid #ccc;
+}
+
+#Task-Name {
+    flex: 1 1 auto;
+    margin-right: 0px;
+    padding: 3px 5px;
+}
+
+#Task-Add {
+    flex: 0 0 auto;
+    margin: 0 0 0 3px;
+    background-color: #070;
+    border: none;
+    color: #fff;
+}
+
+.Controls {
+    background-color: #ccc;
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    padding: 5px;
+}
