@@ -15,7 +15,7 @@
           "request": "launch",
           "name": "Debug Tests",
           "program": "${workspaceFolder}\\node_modules/mocha/bin/_mocha",
-          "args": ["app/**/*.test.js", "--require", "babel-core/register"]
+          "args": ["src/**/*.test.js", "--require", "babel-core/register"]
       }
   ]
 }

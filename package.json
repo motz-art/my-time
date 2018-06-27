@@ -16,8 +16,12 @@
   ],
   "author": "Oleg Oshkodorov",
   "license": "not licensed",
+  "browser": {
+    "vue": "vue/dist/vue.min.js"
+  },
   "dependencies": {
-    "babel-polyfill": "^6.26.0"
+    "babel-polyfill": "^6.26.0",
+    "vue": "^2.5.16"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",

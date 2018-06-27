@@ -51,8 +51,7 @@ let bundler = browserify(browserifyOpts)
           }
         }
       ]
-    ],
-    plugins: ['lodash']
+    ]
   })
   .transform(
     envify({
@@ -61,9 +60,6 @@ let bundler = browserify(browserifyOpts)
     })
   )
   .add(`${settings.sourceFolder}/index.js`);
-bundler.on('file', x => {
-  console.log('file event:', x, arguments.length);
-});
 bundler.on('log', util.log);
 
 function bundle(file) {
@@ -103,8 +99,7 @@ gulp.task('build:scripts-externals', () =>
               }
             }
           ]
-        ],
-        plugins: ['lodash']
+        ]
       });
 
     return externalBundler
@@ -145,8 +140,8 @@ gulp.task('watch:scripts-lint', () => {
           }
           const message = res.messages
             ? res.messages
-                .map(msg => `[${msg.ruleId} ${msg.line}:${msg.column}] ${msg.message}`)
-                .join(' ')
+              .map(msg => `[${msg.ruleId} ${msg.line}:${msg.column}] ${msg.message}`)
+              .join(' ')
             : 'No message';
 
           notifier.notify({

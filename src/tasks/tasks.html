@@ -1,0 +1,21 @@
+<div class="Panel">
+    <h1 class="Header">Time Tracker</h1>
+    <div class="List">
+        <div id="no-items" v-if="tasks.length == 0">You do not have any items in the list.</div>
+        <div class="Task-Item" v-for="task in tasks">
+            <div class="Task-Name">{{ task.title }}</div>
+            <div class="Task-Time">{{ task.remainingTimeFormatted }}</div>
+            <button class="Task-Start" v-if="!task.isRunning" v-on:click="task.start">Start</button>
+            <button class="Task-Start" v-if="task.isRunning" v-on:click="task.stop">Stop</button>
+            <button class="Task-Delete" v-on:click="remove(task)">Delete</button>
+        </div>
+    </div>
+    <div class="New-Item">
+        <input type="text" class="Task-Name" placeholder="New task. 30min" autofocus ref="taskName" v-model="taskName" v-on:keyup.enter="addTask" />
+        <button id="Task-Add" v-on:click="addTask">Add</button>
+    </div>
+    <div class="Controls">
+        <button>Interrupt</button>
+        <button>Start Brake</button>
+    </div>
+</div>

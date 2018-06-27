@@ -14,7 +14,7 @@ gulp.task('build', [
   'build:html',
   'build:styles',
   // 'build:images',
-  // 'build:test'
+  'build:test'
 ]);
 
 gulp.task('watch', [
@@ -23,7 +23,7 @@ gulp.task('watch', [
   'watch:html',
   'watch:styles',
   // 'watch:images',
-  // 'watch:test'
+  'watch:test'
 ]);
 
 gulp.task('default', ['build', 'serve', 'watch']);
