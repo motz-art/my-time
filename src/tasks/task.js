@@ -3,16 +3,17 @@ import formatTime from './format-time.js';
 let runningTask = null;
 
 function updateTime(task) {
-  const remain = getRemainTime(task);
+  const remain = getRemainingTime(task);
   task.remainingTimeFormatted = formatTime(remain);
+  task.raiseEvent('tic', { remainingTime: remain });
 }
 
-function getRemainTime(task) {
+function getRemainingTime(task) {
   if (!task.startTime) {
-    return task.remainTime;
+    return task.remainingTime;
   }
   const time = new Date().getTime();
-  const remain = task.remainTime - time + task.startTime;
+  const remain = task.remainingTime - time + task.startTime;
   return remain;
 }
 
@@ -20,22 +21,19 @@ function getData({ id, title, duration, startTime, remainingTime }) {
   return { id, title, duration, startTime, remainingTime };
 }
 
-function changed(task, changeType, params) {
-  if (typeof task.onchange === 'function') {
-    task.onchange({
-      changeType,
-      task,
-      params
-    });
-  }
-}
-
-function createTask({ id, title, duration, startTime, remainingTime }, onchange) {
+function createTask({ id, title, duration, startTime, remainingTime }) {
   if (remainingTime === undefined) {
     remainingTime = duration;
   }
   const remainingTimeFormatted = formatTime(remainingTime);
   const isRunning = Boolean(startTime);
+  const eventListeners = {
+    start: [],
+    stop: [],
+    tic: [],
+    change: []
+  };
+
   const task = {
     id,
     isRunning,
@@ -44,17 +42,35 @@ function createTask({ id, title, duration, startTime, remainingTime }, onchange)
     startTime,
     remainingTime,
     remainingTimeFormatted,
-    onchange
+  };
+
+  task.addEventListener = function(eventName, handler) {
+    if (!eventListeners[eventName]) {
+      throw new Error(`Unknown event name ${eventName}`);
+    }
+    eventListeners[eventName].push(handler);
+  };
+
+  task.raiseEvent = function(eventName, eventData) {
+    if (!eventListeners[eventName]) {
+      throw new Error(`Unknown event name ${eventName}`);
+    }
+    Object.assign(eventData, { task, eventName });
+    eventListeners[eventName].forEach(handler => handler(eventData));
+  };
+
+  task.getRemainingTime = function() {
+    return getRemainingTime(task);
   };
 
   task.stop = function() {
     clearInterval(task.interval);
-    task.remainingTime = getRemainTime(task);
+    task.remainingTime = getRemainingTime(task);
     task.isRunning = false;
     task.interval = undefined;
     task.startTime = undefined;
     updateTime(task);
-    changed(task, 'stop', {});
+    task.raiseEvent('stop', {});
   };
 
   task.start = function() {
@@ -64,14 +80,14 @@ function createTask({ id, title, duration, startTime, remainingTime }, onchange)
     task.isRunning = true;
     runningTask = task;
     var time = new Date().getTime();
-    if (typeof task.remainTime !== 'number') {
-      task.remainTime = task.duration;
+    if (typeof task.remainingTime !== 'number') {
+      task.remainingTime = task.duration;
     }
     if (!task.startTime) {
       task.startTime = time;
     }
     task.interval = setInterval(() => updateTime(task), 1000);
-    changed(task, 'start', { startTime: time });
+    task.raiseEvent('start', { startTime: time });
   };
 
   task.getData = function() {
