@@ -1,4 +1,4 @@
-function formatTime(ms) {
+function formatTime(ms, short) {
   ms |= 0;
 
   const minus = ms < 0;
@@ -17,10 +17,18 @@ function formatTime(ms) {
 
   const m = Math.floor(ms / 60000) | 0;
   ms -= (m * 60000) | 0;
-  const mStr = m.toString(10).padStart(2, '0') + ':';
+  let mStr = m.toString(10).padStart(2, '0');
+  if (short) {
+    mStr += 'm';
+  } else {
+    mStr += ':';
+  }
 
   const s = Math.round(ms / 1000) | 0;
-  const sStr = s.toString(10).padStart(2, '0');
+  let sStr = s.toString(10).padStart(2, '0');
+  if (short) {
+    sStr = '';
+  }
 
   return [minusStr, ds, hStr, mStr, sStr].join('');
 }

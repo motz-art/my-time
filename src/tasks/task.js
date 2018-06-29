@@ -41,7 +41,7 @@ function createTask({ id, title, duration, startTime, remainingTime }) {
     duration,
     startTime,
     remainingTime,
-    remainingTimeFormatted,
+    remainingTimeFormatted
   };
 
   task.addEventListener = function(eventName, handler) {
@@ -71,6 +71,10 @@ function createTask({ id, title, duration, startTime, remainingTime }) {
     task.startTime = undefined;
     updateTime(task);
     task.raiseEvent('stop', {});
+  };
+
+  task.getRemainingTimeFormatted = function(short) {
+    return formatTime(task.getRemainingTime(), short);
   };
 
   task.start = function() {

@@ -4,6 +4,7 @@ import parseTaskInput from './parse-task-input';
 import task from './task.js';
 import template from './tasks.html';
 import storage from '../storage.js';
+import timeIco from './time-ico';
 
 const notificationPeriod = 300000;
 const notificationPeriodDelta = 499;
@@ -26,11 +27,11 @@ Vue.component('tasks', {
     lastNotificationTask: 0,
     nextNotificationTime: null
   }),
-  created: async function () {
+  created: async function() {
     const tasksData = await storage.loadTasks();
     this.tasks = tasksData.map(data => this.createTask(data));
     if (Notification.permission !== 'denied') {
-      Notification.requestPermission(function (permission) {
+      Notification.requestPermission(function(permission) {
         if (permission === 'granted') {
           console.log('cool!');
         }
@@ -38,7 +39,7 @@ Vue.component('tasks', {
     }
   },
   methods: {
-    createTask: function (taskData) {
+    createTask: function(taskData) {
       const taskModel = task.createTask(taskData);
       taskModel.addEventListener('start', e => this.saveTask(e));
       taskModel.addEventListener('start', e => this.setupNotifications(e));
@@ -49,17 +50,22 @@ Vue.component('tasks', {
       }
       return taskModel;
     },
-    setupNotifications: function ({ task }) {
+    setupNotifications: function({ task }) {
       var remainingTime = task.getRemainingTime();
       this.nextNotificationTime = calculateNextNotificationTime(remainingTime);
     },
-    notify: function ({ task, remainingTime }) {
-      if (remainingTime <= 0 && this.lastNotificationTask != task.id) {
+    notify: function({ task, remainingTime }) {
+      if (remainingTime <= 0 && this.lastNotificationTask !== task.id) {
         this.lastNotificationTask = task.id;
         if (Notification.permission === 'granted') {
           const n = new Notification('Time is over!', {
             tag: task.id,
-            body: `${task.title}' ${task.remainingTimeFormatted}`
+            body: `${task.title}' ${task.remainingTimeFormatted}`,
+            icon: timeIco({
+              remainingTime,
+              totalTime: task.duration,
+              remainingTimeFormatted: task.getRemainingTimeFormatted(true)
+            })
           });
         }
       } else if (remainingTime < this.nextNotificationTime) {
@@ -67,7 +73,12 @@ Vue.component('tasks', {
         if (Notification.permission === 'granted') {
           const n = new Notification(`${task.remainingTimeFormatted} left.`, {
             tag: task.id,
-            body: `${task.title}' ${task.remainingTimeFormatted}`
+            body: `${task.title}' ${task.remainingTimeFormatted}`,
+            icon: timeIco({
+              remainingTime,
+              totalTime: task.duration,
+              remainingTimeFormatted: task.getRemainingTimeFormatted(true)
+            })
           });
         }
       }
@@ -90,7 +101,7 @@ Vue.component('tasks', {
       }
       await storage.removeTask(task.getData());
     },
-    addTask: async function () {
+    addTask: async function() {
       const info = parseTaskInput(this.taskName);
       const taskVm = this.createTask(info);
       this.tasks.push(taskVm);
