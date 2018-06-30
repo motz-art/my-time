@@ -23,15 +23,15 @@ module.exports = {
         "singleQuote": true,
         "printWidth": 90
       }
-    ]
-  },
+    ],
+    "no-console": "error", //disallow the use of console
+},
   // "rules": {
   //   "for-direction": ["error"], //enforce “for” loop update clause moving the counter in the right direction
   //   "getter-return": ["error"], //enforce return statements in getters
   //   "no-await-in-loop": ["off"], //disallow await inside of loops
   //   "comma-dangle": ["error", "never"], //require or disallow trailing commas
   //   "no-cond-assign": "error", //disallow assignment operators in conditional expressions
-  //   "no-console": "error", //disallow the use of console
   //   "no-constant-condition": "error", //disallow constant expressions in conditions
   //   "no-control-regex": "error", //disallow control characters in regular expressions
   //   "no-debugger": "error", //disallow the use of debugger

@@ -3,9 +3,10 @@
     <div class="List">
         <div id="no-items" v-if="tasks.length == 0">You do not have any items in the list.</div>
         <div class="Task-Item" v-for="task in tasks">
+            <input type="checkbox" :checked="task.isComplete" v-on:click="changeComplete(task)" />
             <div class="Task-Name">{{ task.title }}</div>
             <div class="Task-Time">{{ task.remainingTimeFormatted }}</div>
-            <button class="Task-Start" v-if="!task.isRunning" v-on:click="task.start">Start</button>
+            <button class="Task-Start" v-if="!task.isRunning" :disabled="task.isComplete" v-on:click="task.start">Start</button>
             <button class="Task-Start" v-if="task.isRunning" v-on:click="task.stop">Stop</button>
             <button class="Task-Delete" v-on:click="remove(task)">Delete</button>
         </div>

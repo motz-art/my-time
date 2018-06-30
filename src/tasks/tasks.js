@@ -26,6 +26,8 @@ Vue.component('tasks', {
       taskModel.addEventListener('start', e => this.saveTask(e));
       taskModel.addEventListener('start', e => notification.setupNotifications(e.task));
       taskModel.addEventListener('stop', e => this.saveTask(e));
+      taskModel.addEventListener('complete', e => this.saveTask(e));
+      taskModel.addEventListener('incomplete', e => this.saveTask(e));
       taskModel.addEventListener('tic', e =>
         notification.notify(e.task, e.remainingTime)
       );
@@ -44,11 +46,19 @@ Vue.component('tasks', {
         task.id = data.id;
       });
     },
+    changeComplete: async function(task) {
+      if (task.isComplete) {
+        task.incomplete();
+      } else {
+        task.complete();
+      }
+    },
     remove: async function(task) {
       const taskIndex = this.tasks.findIndex(x => x === task);
       if (taskIndex >= 0) {
         this.tasks.splice(taskIndex, 1);
       } else {
+        // eslint-disable-next-line no-console
         console.error('task not found :(.');
       }
       if (task.startTime) {

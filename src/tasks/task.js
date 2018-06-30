@@ -17,11 +17,12 @@ function getRemainingTime(task) {
   return remain;
 }
 
-function getData({ id, title, duration, startTime, remainingTime }) {
-  return { id, title, duration, startTime, remainingTime };
+function getData({ id, title, duration, startTime, remainingTime, isComplete }) {
+  return { id, title, duration, startTime, remainingTime, isComplete };
 }
 
-function createTask({ id, title, duration, startTime, remainingTime }) {
+function createTask({ id, title, duration, startTime, remainingTime, isComplete }) {
+  isComplete = isComplete || false;
   if (remainingTime === undefined) {
     remainingTime = duration;
   }
@@ -31,6 +32,8 @@ function createTask({ id, title, duration, startTime, remainingTime }) {
     start: [],
     stop: [],
     tic: [],
+    complete: [],
+    incomplete: [],
     change: []
   };
 
@@ -38,6 +41,7 @@ function createTask({ id, title, duration, startTime, remainingTime }) {
     id,
     isRunning,
     title,
+    isComplete,
     duration,
     startTime,
     remainingTime,
@@ -63,6 +67,19 @@ function createTask({ id, title, duration, startTime, remainingTime }) {
     return getRemainingTime(task);
   };
 
+  task.complete = function() {
+    if (task.isRunning) {
+      task.stop();
+    }
+    task.isComplete = true;
+    task.raiseEvent('complete', {});
+  };
+
+  task.incomplete = function() {
+    task.isComplete = false;
+    task.raiseEvent('incomplete', {});
+  };
+
   task.stop = function() {
     clearInterval(task.interval);
     task.remainingTime = getRemainingTime(task);
@@ -78,6 +95,9 @@ function createTask({ id, title, duration, startTime, remainingTime }) {
   };
 
   task.start = function() {
+    if (task.isComplete) {
+      throw new Error(`Can't start complete task.`);
+    }
     if (runningTask) {
       runningTask.stop();
     }
