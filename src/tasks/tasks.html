@@ -15,6 +15,14 @@
         <input type="text" class="Task-Name" placeholder="New task. 30min" autofocus ref="taskName" v-model="taskName" v-on:keyup.enter="addTask" />
         <button id="Task-Add" v-on:click="addTask">Add</button>
     </div>
+    <div class="stat">
+        Complete
+        <span title="Planned">{{formatTime(completedPlaned, true)}}</span>/
+        <span title="Planned">{{formatTime(completedActual, true)}}</span>
+        <span title="Planned vs Actual">{{formatTime(completedPlaned-completedActual, true)}}</span> |
+        Incomplete
+        <span title="Planned">{{formatTime(incompletePlaned, true)}}</span>
+    </div>
     <div class="Controls">
         <button>Interrupt</button>
         <button>Start Brake</button>

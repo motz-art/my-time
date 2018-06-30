@@ -4,6 +4,7 @@ let runningTask = null;
 
 function updateTime(task) {
   const remain = getRemainingTime(task);
+  task.spentTime = task.duration - remain;
   task.remainingTimeFormatted = formatTime(remain);
   task.raiseEvent('tic', { remainingTime: remain });
 }
@@ -36,13 +37,14 @@ function createTask({ id, title, duration, startTime, remainingTime, isComplete 
     incomplete: [],
     change: []
   };
-
+  const spentTime = duration - remainingTime;
   const task = {
     id,
     isRunning,
     title,
     isComplete,
     duration,
+    spentTime,
     startTime,
     remainingTime,
     remainingTimeFormatted

@@ -6,6 +6,7 @@ import template from './tasks.html';
 import storage from '../storage.js';
 import download from '../download.js';
 import notification from './notification.js';
+import formatTime from './format-time.js';
 
 Vue.component('tasks', {
   template,
@@ -13,6 +14,27 @@ Vue.component('tasks', {
     tasks: [],
     taskName: ''
   }),
+  computed: {
+    completedPlaned: function() {
+      return this.tasks.reduce(
+        (sum, task) => sum + (task.isComplete ? task.duration : 0),
+        0
+      );
+    },
+    completedActual: function() {
+      return this.tasks.reduce(
+        (sum, task) => sum + (task.isComplete ? task.spentTime : 0),
+        0
+      );
+    },
+    incompletePlaned: function() {
+      return this.tasks.reduce(
+        (sum, task) =>
+          sum + (task.isComplete ? 0 : Math.max(task.duration, task.spentTime)),
+        0
+      );
+    }
+  },
   created: async function() {
     const tasksData = await storage.loadTasks();
     this.tasks = tasksData.map(data => this.createTask(data));
@@ -21,6 +43,7 @@ Vue.component('tasks', {
     }
   },
   methods: {
+    formatTime,
     createTask: function(taskData) {
       const taskModel = task.createTask(taskData);
       taskModel.addEventListener('start', e => this.saveTask(e));
