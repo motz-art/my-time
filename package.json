@@ -1,17 +1,18 @@
 {
-  "name": "tasks",
+  "name": "my-time",
   "version": "1.0.0",
-  "description": "Task tracker app",
+  "description": "Time tracker app",
   "main": "index.js",
   "scripts": {
     "start": "gulp",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
+    "time management",
+    "time box",
     "task",
     "tasks",
     "project management",
-    "time management",
     "management"
   ],
   "author": "Oleg Oshkodorov",
