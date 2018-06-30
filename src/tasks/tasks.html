@@ -2,7 +2,7 @@
     <h1 class="Header">Time Tracker</h1>
     <div class="List">
         <div id="no-items" v-if="tasks.length == 0">You do not have any items in the list.</div>
-        <div class="Task-Item" v-for="task in tasks">
+        <div class="Task-Item" v-for="task in tasks" :class="{ 'Task-Item--running': task.isRunning }">
             <input type="checkbox" :checked="task.isComplete" v-on:click="changeComplete(task)" />
             <div class="Task-Name">{{ task.title }}</div>
             <div class="Task-Time">{{ task.remainingTimeFormatted }}</div>
