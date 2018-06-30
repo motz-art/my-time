@@ -4,29 +4,14 @@ import parseTaskInput from './parse-task-input';
 import task from './task.js';
 import template from './tasks.html';
 import storage from '../storage.js';
-import timeIco from './time-ico.js';
 import download from '../download.js';
-
-const notificationPeriod = 300000;
-const notificationPeriodDelta = 499;
-
-function calculateNextNotificationTime(remainingTime) {
-  var steps = Math.floor((remainingTime - notificationPeriodDelta) / notificationPeriod);
-  if (steps === 0) {
-    steps--;
-  }
-  let nextTime = steps * notificationPeriod;
-  nextTime += notificationPeriodDelta;
-  return nextTime;
-}
+import notification from './notification.js';
 
 Vue.component('tasks', {
   template,
   data: () => ({
     tasks: [],
-    taskName: '',
-    lastNotificationTask: 0,
-    nextNotificationTime: null
+    taskName: ''
   }),
   created: async function() {
     const tasksData = await storage.loadTasks();
@@ -43,46 +28,15 @@ Vue.component('tasks', {
     createTask: function(taskData) {
       const taskModel = task.createTask(taskData);
       taskModel.addEventListener('start', e => this.saveTask(e));
-      taskModel.addEventListener('start', e => this.setupNotifications(e));
+      taskModel.addEventListener('start', e => notification.setupNotifications(e.task));
       taskModel.addEventListener('stop', e => this.saveTask(e));
-      taskModel.addEventListener('tic', e => this.notify(e));
+      taskModel.addEventListener('tic', e =>
+        notification.notify(e.task, e.remainingTime)
+      );
       if (taskModel.startTime) {
-        this.setupNotifications({ task: taskModel });
+        notification.setupNotifications(taskModel);
       }
       return taskModel;
-    },
-    setupNotifications: function({ task }) {
-      var remainingTime = task.getRemainingTime();
-      this.nextNotificationTime = calculateNextNotificationTime(remainingTime);
-    },
-    notify: function({ task, remainingTime }) {
-      if (remainingTime <= 0 && this.lastNotificationTask !== task.id) {
-        this.lastNotificationTask = task.id;
-        if (Notification.permission === 'granted') {
-          const n = new Notification('Time is over!', {
-            tag: task.id,
-            body: `${task.title}' ${task.remainingTimeFormatted}`,
-            icon: timeIco({
-              remainingTime,
-              totalTime: task.duration,
-              remainingTimeFormatted: task.getRemainingTimeFormatted(true)
-            })
-          });
-        }
-      } else if (remainingTime < this.nextNotificationTime) {
-        this.nextNotificationTime = calculateNextNotificationTime(remainingTime);
-        if (Notification.permission === 'granted') {
-          const n = new Notification(`${task.remainingTimeFormatted} left.`, {
-            tag: task.id,
-            body: `${task.title}' ${task.remainingTimeFormatted}`,
-            icon: timeIco({
-              remainingTime,
-              totalTime: task.duration,
-              remainingTimeFormatted: task.getRemainingTimeFormatted(true)
-            })
-          });
-        }
-      }
     },
     exportData: async function() {
       const data = await storage.exportData();
