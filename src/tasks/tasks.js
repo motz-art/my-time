@@ -17,11 +17,7 @@ Vue.component('tasks', {
     const tasksData = await storage.loadTasks();
     this.tasks = tasksData.map(data => this.createTask(data));
     if (Notification.permission !== 'denied') {
-      Notification.requestPermission(function(permission) {
-        if (permission === 'granted') {
-          console.log('cool!');
-        }
-      });
+      Notification.requestPermission(function() {});
     }
   },
   methods: {
@@ -44,7 +40,7 @@ Vue.component('tasks', {
     },
     saveTask: function({ task }) {
       const data = task.getData();
-      storage.saveTask(data).then(() => {
+      return storage.saveTask(data).then(() => {
         task.id = data.id;
       });
     },

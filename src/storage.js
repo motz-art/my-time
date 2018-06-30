@@ -37,8 +37,9 @@ async function exportData() {
 }
 
 function wrapInTransaction(fn) {
-  return async function() {
+  return function() {
     currentTask = currentTask.then(() => fn.apply(this, arguments));
+    return currentTask;
   };
 }
 
