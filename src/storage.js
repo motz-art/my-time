@@ -30,6 +30,12 @@ async function saveTask(task) {
   localStorage.tasks = JSON.stringify(tasks);
 }
 
+async function exportData() {
+  return {
+    tasks: await loadTasks()
+  };
+}
+
 function wrapInTransaction(fn) {
   return async function() {
     currentTask = currentTask.then(() => fn.apply(this, arguments));
@@ -39,5 +45,6 @@ function wrapInTransaction(fn) {
 export default {
   saveTask: wrapInTransaction(saveTask),
   removeTask: wrapInTransaction(removeTask),
-  loadTasks
+  loadTasks,
+  exportData
 };

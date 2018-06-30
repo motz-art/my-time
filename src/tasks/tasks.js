@@ -4,7 +4,8 @@ import parseTaskInput from './parse-task-input';
 import task from './task.js';
 import template from './tasks.html';
 import storage from '../storage.js';
-import timeIco from './time-ico';
+import timeIco from './time-ico.js';
+import download from '../download.js';
 
 const notificationPeriod = 300000;
 const notificationPeriodDelta = 499;
@@ -82,6 +83,10 @@ Vue.component('tasks', {
           });
         }
       }
+    },
+    exportData: async function() {
+      const data = await storage.exportData();
+      download(data, 'tasks.json');
     },
     saveTask: function({ task }) {
       const data = task.getData();
