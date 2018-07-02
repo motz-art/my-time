@@ -29,11 +29,16 @@ Vue.component('tasks', {
     },
     incompletePlaned: function() {
       return this.tasks.reduce(
-        (sum, task) =>
-          sum + (task.isComplete ? 0 : Math.max(task.duration, task.spentTime)),
+        (sum, task) => sum + (task.isComplete ? 0 : task.duration),
         0
       );
-    }
+    },
+    incompleteSpent: function() {
+      return this.tasks.reduce(
+        (sum, task) => sum + (task.isComplete ? 0 : task.spentTime),
+        0
+      );
+    },
   },
   created: async function() {
     const tasksData = await storage.loadTasks();
