@@ -83,7 +83,9 @@ function createTask({ id, title, duration, startTime, remainingTime, isComplete 
   };
 
   task.stop = function() {
-    clearInterval(task.interval);
+    if (task.interval) {
+      clearInterval(task.interval);
+    }
     task.remainingTime = getRemainingTime(task);
     task.isRunning = false;
     task.interval = undefined;
@@ -111,6 +113,9 @@ function createTask({ id, title, duration, startTime, remainingTime, isComplete 
     }
     if (!task.startTime) {
       task.startTime = time;
+    }
+    if (task.interval) {
+      clearInterval(task.interval);
     }
     task.interval = setInterval(() => updateTime(task), 1000);
     task.raiseEvent('start', { startTime: time });
