@@ -622,7 +622,9 @@ function createTask({ id, title, duration, startTime, remainingTime, isComplete 
   };
 
   task.stop = function () {
-    clearInterval(task.interval);
+    if (task.interval) {
+      clearInterval(task.interval);
+    }
     task.remainingTime = getRemainingTime(task);
     task.isRunning = false;
     task.interval = undefined;
@@ -651,6 +653,9 @@ function createTask({ id, title, duration, startTime, remainingTime, isComplete 
     if (!task.startTime) {
       task.startTime = time;
     }
+    if (task.interval) {
+      clearInterval(task.interval);
+    }
     task.interval = setInterval(() => updateTime(task), 1000);
     task.raiseEvent('start', { startTime: time });
   };
@@ -670,7 +675,7 @@ function createTask({ id, title, duration, startTime, remainingTime, isComplete 
 exports.default = { createTask };
 
 },{"./format-time.js":8}],12:[function(require,module,exports){
-module.exports = "<div class=\"Panel\">\n    <h1 class=\"Header\">Time Tracker</h1>\n    <div class=\"List\">\n        <div id=\"no-items\" v-if=\"tasks.length == 0\">You do not have any items in the list.</div>\n        <div class=\"Task-Item\" v-for=\"task in tasks\" :class=\"{ 'Task-Item--running': task.isRunning }\">\n            <input type=\"checkbox\" :checked=\"task.isComplete\" v-on:click=\"changeComplete(task)\" />\n            <div class=\"Task-Name\">{{ task.title }}</div>\n            <div class=\"Task-Time\">{{ task.remainingTimeFormatted }}</div>\n            <button class=\"Task-Start\" v-if=\"!task.isRunning\" :disabled=\"task.isComplete\" v-on:click=\"task.start\">Start</button>\n            <button class=\"Task-Start\" v-if=\"task.isRunning\" v-on:click=\"task.stop\">Stop</button>\n            <button class=\"Task-Delete\" v-on:click=\"remove(task)\">Delete</button>\n        </div>\n    </div>\n    <div class=\"New-Item\">\n        <input type=\"text\" class=\"Task-Name\" placeholder=\"New task. 30min\" autofocus ref=\"taskName\" v-model=\"taskName\" v-on:keyup.enter=\"addTask\" />\n        <button id=\"Task-Add\" v-on:click=\"addTask\">Add</button>\n    </div>\n    <div class=\"Task-Stat\">\n        Complete\n        <span title=\"Planned\">{{formatTime(completedPlaned, true)}}</span>/\n        <span title=\"Planned\">{{formatTime(completedActual, true)}}</span>\n        <span title=\"Planned vs Actual\">{{formatTime(completedPlaned-completedActual, true)}}</span> |\n        Incomplete\n        <span title=\"Planned\">{{formatTime(incompletePlaned, true)}}</span>\n    </div>\n    <div class=\"Controls\">\n        <button>Interrupt</button>\n        <button>Start Brake</button>\n        <button v-on:click=\"exportData\">Export</button>\n    </div>\n</div>\n";
+module.exports = "<div class=\"Panel\">\n    <h1 class=\"Header\">Time Tracker</h1>\n    <div class=\"List\">\n        <div id=\"no-items\" v-if=\"tasks.length == 0\">You do not have any items in the list.</div>\n        <div class=\"Task-Item\" v-for=\"task in tasks\" :class=\"{ 'Task-Item--running': task.isRunning }\">\n            <input type=\"checkbox\" :checked=\"task.isComplete\" v-on:click=\"changeComplete(task)\" />\n            <div class=\"Task-Name\">{{ task.title }}</div>\n            <div class=\"Task-Time\">{{ task.remainingTimeFormatted }}</div>\n            <button class=\"Task-Start\" v-if=\"!task.isRunning\" :disabled=\"task.isComplete\" v-on:click=\"task.start\">Start</button>\n            <button class=\"Task-Start\" v-if=\"task.isRunning\" v-on:click=\"task.stop\">Stop</button>\n            <button class=\"Task-Delete\" v-on:click=\"remove(task)\">Delete</button>\n        </div>\n    </div>\n    <div class=\"New-Item\">\n        <input type=\"text\" class=\"Task-Name\" placeholder=\"New task. 30min\" autofocus ref=\"taskName\" v-model=\"taskName\" v-on:keyup.enter=\"addTask\" />\n        <button id=\"Task-Add\" v-on:click=\"addTask\">Add</button>\n    </div>\n    <div class=\"Task-Stat\">\n        Incomplete\n        <span title=\"Planned\">{{formatTime(incompletePlaned, true)}}</span>/\n        <span title=\"Planned\">{{formatTime(incompleteSpent, true)}}</span> |\n        Complete\n        <span title=\"Planned\">{{formatTime(completedPlaned, true)}}</span>/\n        <span title=\"Planned\">{{formatTime(completedActual, true)}}</span>\n        <span title=\"Planned vs Actual\">{{formatTime(completedPlaned-completedActual, true)}}</span>\n    </div>\n    <div class=\"Controls\">\n        <button>Interrupt</button>\n        <button>Start Brake</button>\n        <button v-on:click=\"exportData\">Export</button>\n    </div>\n</div>\n";
 
 },{}],13:[function(require,module,exports){
 'use strict';
@@ -724,7 +729,10 @@ _vue2.default.component('tasks', {
       return this.tasks.reduce((sum, task) => sum + (task.isComplete ? task.spentTime : 0), 0);
     },
     incompletePlaned: function () {
-      return this.tasks.reduce((sum, task) => sum + (task.isComplete ? 0 : Math.max(task.duration, task.spentTime)), 0);
+      return this.tasks.reduce((sum, task) => sum + (task.isComplete ? 0 : task.duration), 0);
+    },
+    incompleteSpent: function () {
+      return this.tasks.reduce((sum, task) => sum + (task.isComplete ? 0 : task.spentTime), 0);
     }
   },
   created: async function () {
