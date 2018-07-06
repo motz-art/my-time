@@ -1,0 +1,59 @@
+.GroupSelector {
+    width: 12px;
+    height: 12px;
+    margin: 0 2px;
+    position: relative;
+}
+
+.GroupSelector-Button {
+    border: 1px solid #ccc;
+    background-color: #eee;
+    padding: 0px;
+    width: 12px;
+    height: 12px;
+}
+
+.GroupSelector-Color {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    background-color: #eee;
+    &.GroupSelector-Color--blue{
+        background-color: #88f;
+    }
+    &.GroupSelector-Color--red{
+        background-color: #f66;
+    }
+    &.GroupSelector-Color--yellow{
+        background-color: #ee8;
+    }
+    &.GroupSelector-Color--red{
+        background-color: #fa0;
+    }
+}
+
+.GroupSelector-DropDown {
+    position: absolute;
+    z-index: 1000;
+    display: none;
+    top: 100%;
+    border: 1px solid #ccc;
+    background-color: white;
+    width: 130px;
+    list-style: none;
+    padding: 1px;
+    margin: 0;
+
+    li {
+        cursor: default;
+        margin: 0;
+        padding: 1px 3px;
+        &:hover {
+            background-color: #ccc;
+        }
+    }
+}
+
+.GroupSelector.GroupSelector--open>.GroupSelector-DropDown {
+    display: block;
+}

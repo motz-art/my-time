@@ -1,0 +1,13 @@
+<div class="GroupSelector" :class="{ 'GroupSelector--open': isOpen }">
+    <button class="GroupSelector-Button" v-on:click="click">
+        <div class="GroupSelector-Color"
+            :style="{ 'background-color': group.color }"></div>
+    </button>
+    <ul class="GroupSelector-DropDown">
+        <li v-for="group in groups" v-on:click="groupClick(group)" >
+            <div class="GroupSelector-Color"
+            :style="{ 'background-color': group.color }"></div>
+            {{group.name}}
+        </li>
+    </ul>
+</div>

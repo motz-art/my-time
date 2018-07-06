@@ -1,4 +1,5 @@
 import './tasks/tasks.js';
+import './tasks/group-selector.js';
 import Vue from 'vue';
 import template from './main.html';
 

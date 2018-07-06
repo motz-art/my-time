@@ -18,11 +18,19 @@ function getRemainingTime(task) {
   return remain;
 }
 
-function getData({ id, title, duration, startTime, remainingTime, isComplete }) {
-  return { id, title, duration, startTime, remainingTime, isComplete };
+function getData({ id, title, duration, startTime, remainingTime, isComplete, group }) {
+  return { id, title, duration, startTime, remainingTime, isComplete, group };
 }
 
-function createTask({ id, title, duration, startTime, remainingTime, isComplete }) {
+function createTask({
+  id,
+  title,
+  duration,
+  startTime,
+  remainingTime,
+  isComplete,
+  group
+}) {
   isComplete = isComplete || false;
   if (remainingTime === undefined) {
     remainingTime = duration;
@@ -47,7 +55,8 @@ function createTask({ id, title, duration, startTime, remainingTime, isComplete 
     spentTime,
     startTime,
     remainingTime,
-    remainingTimeFormatted
+    remainingTimeFormatted,
+    group
   };
 
   task.addEventListener = function(eventName, handler) {
