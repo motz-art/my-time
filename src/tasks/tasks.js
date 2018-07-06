@@ -38,7 +38,7 @@ Vue.component('tasks', {
         (sum, task) => sum + (task.isComplete ? 0 : task.spentTime),
         0
       );
-    },
+    }
   },
   created: async function() {
     const tasksData = await storage.loadTasks();
@@ -66,7 +66,26 @@ Vue.component('tasks', {
     },
     exportData: async function() {
       const data = await storage.exportData();
-      download(data, 'tasks.json');
+      const time = new Date();
+      download(
+        data,
+        `tasks-${time.getFullYear()}-${time
+          .getMonth()
+          .toString()
+          .padStart(2, '0')}-${time
+          .getDate()
+          .toString()
+          .padStart(2, '0')}-${time
+          .getHours()
+          .toString()
+          .padStart(2, '0')}-${time
+          .getMinutes()
+          .toString()
+          .padStart(2, '0')}-${time
+          .getSeconds()
+          .toString()
+          .padStart(2, '0')}.json`
+      );
     },
     saveTask: function({ task }) {
       const data = task.getData();
