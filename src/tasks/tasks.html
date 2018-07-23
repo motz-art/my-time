@@ -19,11 +19,11 @@
     <div class="Task-Stat">
         Incomplete
         <span title="Planned">{{formatTime(incompletePlaned, true)}}</span>/
-        <span title="Planned">{{formatTime(incompleteSpent, true)}}</span> |
+        <span title="Spent">{{formatTime(incompleteSpent, true)}}</span> |
         Complete
         <span title="Planned">{{formatTime(completedPlaned, true)}}</span>/
-        <span title="Planned">{{formatTime(completedActual, true)}}</span>
-        <span title="Planned vs Actual">{{formatTime(completedPlaned-completedActual, true)}}</span>
+        <span title="Actual">{{formatTime(completedActual, true)}}</span>
+        <span title="Planned vs. Actual">{{formatTime(completedPlaned-completedActual, true)}}</span>
     </div>
     <div class="Controls">
         <button>Interrupt</button>
