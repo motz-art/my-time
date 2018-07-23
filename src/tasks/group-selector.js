@@ -22,6 +22,13 @@ Vue.component('group-selector', {
       this.group = groups[0];
     }
   },
+  watch: {
+    group: function(val) {
+      if (!this.group) {
+        this.group = groups[0];
+      }
+    }
+  },
   methods: {
     click: function() {
       this.isOpen = !this.isOpen;

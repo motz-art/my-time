@@ -19,7 +19,15 @@ function getRemainingTime(task) {
 }
 
 function getData({ id, title, duration, startTime, remainingTime, isComplete, group }) {
-  return { id, title, duration, startTime, remainingTime, isComplete, group };
+  return {
+    id,
+    title,
+    duration,
+    startTime,
+    remainingTime,
+    isComplete,
+    group: { name: group.name, color: group.color }
+  };
 }
 
 function createTask({
@@ -43,7 +51,8 @@ function createTask({
     tic: [],
     complete: [],
     incomplete: [],
-    change: []
+    change: [],
+    updateGroup: []
   };
   const spentTime = duration - remainingTime;
   const task = {
@@ -132,6 +141,12 @@ function createTask({
 
   task.getData = function() {
     return getData(task);
+  };
+
+  task.updateGroup = function(a, b, c) {
+    task.group = { name: a.name, color: a.color };
+    console.log(task.group);
+    task.raiseEvent('updateGroup', task.group);
   };
 
   if (task.startTime) {

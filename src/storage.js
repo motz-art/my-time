@@ -19,6 +19,7 @@ async function saveTask(task) {
   if (!task) {
     return;
   }
+  console.log('Save group:', task.group);
   let tasks = await loadTasks();
   task.id = task.id || new Date().getTime();
   let taskIndex = tasks.findIndex(x => x.id === task.id);

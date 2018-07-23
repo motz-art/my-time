@@ -52,6 +52,7 @@ Vue.component('tasks', {
     createTask: function(taskData) {
       const taskModel = task.createTask(taskData);
       taskModel.addEventListener('start', e => this.saveTask(e));
+      taskModel.addEventListener('updateGroup', e => this.saveTask(e));
       taskModel.addEventListener('start', e => notification.setupNotifications(e.task));
       taskModel.addEventListener('stop', e => this.saveTask(e));
       taskModel.addEventListener('complete', e => this.saveTask(e));
