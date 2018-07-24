@@ -298,6 +298,8 @@ function downloadObjectAsJson(obj, fileName) {
 
 require('./tasks/tasks.js');
 
+require('./tasks/group-selector.js');
+
 var _vue = require('vue');
 
 var _vue2 = _interopRequireDefault(_vue);
@@ -313,11 +315,11 @@ var app = new _vue2.default({
   template: _main2.default
 });
 
-},{"./main.html":6,"./tasks/tasks.js":13,"vue":3}],6:[function(require,module,exports){
+},{"./main.html":6,"./tasks/group-selector.js":10,"./tasks/tasks.js":15,"vue":3}],6:[function(require,module,exports){
 module.exports = "<tasks></tasks>\n";
 
 },{}],7:[function(require,module,exports){
-"use strict";
+'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -343,6 +345,7 @@ async function saveTask(task) {
   if (!task) {
     return;
   }
+  console.log('Save group:', task.group);
   let tasks = await loadTasks();
   task.id = task.id || new Date().getTime();
   let taskIndex = tasks.findIndex(x => x.id === task.id);
@@ -420,6 +423,57 @@ function formatTime(ms, short) {
 exports.default = formatTime;
 
 },{}],9:[function(require,module,exports){
+module.exports = "<div class=\"GroupSelector\" :class=\"{ 'GroupSelector--open': isOpen }\">\n    <button class=\"GroupSelector-Button\" v-on:click=\"click\">\n        <div class=\"GroupSelector-Color\"\n            :style=\"{ 'background-color': group.color }\"></div>\n    </button>\n    <ul class=\"GroupSelector-DropDown\">\n        <li v-for=\"group in groups\" v-on:click=\"groupClick(group)\" >\n            <div class=\"GroupSelector-Color\"\n            :style=\"{ 'background-color': group.color }\"></div>\n            {{group.name}}\n        </li>\n    </ul>\n</div>\n";
+
+},{}],10:[function(require,module,exports){
+'use strict';
+
+var _vue = require('vue');
+
+var _vue2 = _interopRequireDefault(_vue);
+
+var _groupSelector = require('./group-selector.html');
+
+var _groupSelector2 = _interopRequireDefault(_groupSelector);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const groups = [{ color: '#88f', name: 'Work' }, { color: '#f66', name: 'Unplanned' }, { color: '#ee8', name: 'Organization' }, { color: '#fa0', name: 'Other' }];
+
+_vue2.default.component('group-selector', {
+  template: _groupSelector2.default,
+  props: ['group'],
+  data: function () {
+    return {
+      groups,
+      isOpen: false
+    };
+  },
+  created: function () {
+    if (!this.group) {
+      this.group = groups[0];
+    }
+  },
+  watch: {
+    group: function (val) {
+      if (!this.group) {
+        this.group = groups[0];
+      }
+    }
+  },
+  methods: {
+    click: function () {
+      this.isOpen = !this.isOpen;
+    },
+    groupClick: function (group) {
+      this.group = group;
+      this.isOpen = false;
+      this.$emit('group', group);
+    }
+  }
+});
+
+},{"./group-selector.html":9,"vue":3}],11:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -480,7 +534,7 @@ function notify(task, remainingTime) {
 
 exports.default = { notify, setupNotifications };
 
-},{"./time-ico.js":14}],10:[function(require,module,exports){
+},{"./time-ico.js":16}],12:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -526,7 +580,7 @@ function parseTaskInput(name) {
 
 exports.default = parseTaskInput;
 
-},{}],11:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -557,11 +611,27 @@ function getRemainingTime(task) {
   return remain;
 }
 
-function getData({ id, title, duration, startTime, remainingTime, isComplete }) {
-  return { id, title, duration, startTime, remainingTime, isComplete };
+function getData({ id, title, duration, startTime, remainingTime, isComplete, group }) {
+  return {
+    id,
+    title,
+    duration,
+    startTime,
+    remainingTime,
+    isComplete,
+    group: { name: group.name, color: group.color }
+  };
 }
 
-function createTask({ id, title, duration, startTime, remainingTime, isComplete }) {
+function createTask({
+  id,
+  title,
+  duration,
+  startTime,
+  remainingTime,
+  isComplete,
+  group
+}) {
   isComplete = isComplete || false;
   if (remainingTime === undefined) {
     remainingTime = duration;
@@ -574,7 +644,8 @@ function createTask({ id, title, duration, startTime, remainingTime, isComplete 
     tic: [],
     complete: [],
     incomplete: [],
-    change: []
+    change: [],
+    updateGroup: []
   };
   const spentTime = duration - remainingTime;
   const task = {
@@ -586,7 +657,8 @@ function createTask({ id, title, duration, startTime, remainingTime, isComplete 
     spentTime,
     startTime,
     remainingTime,
-    remainingTimeFormatted
+    remainingTimeFormatted,
+    group
   };
 
   task.addEventListener = function (eventName, handler) {
@@ -664,6 +736,12 @@ function createTask({ id, title, duration, startTime, remainingTime, isComplete 
     return getData(task);
   };
 
+  task.updateGroup = function (a, b, c) {
+    task.group = { name: a.name, color: a.color };
+    console.log(task.group);
+    task.raiseEvent('updateGroup', task.group);
+  };
+
   if (task.startTime) {
     task.start();
     updateTime(task);
@@ -674,10 +752,10 @@ function createTask({ id, title, duration, startTime, remainingTime, isComplete 
 
 exports.default = { createTask };
 
-},{"./format-time.js":8}],12:[function(require,module,exports){
-module.exports = "<div class=\"Panel\">\n    <h1 class=\"Header\">Time Tracker</h1>\n    <div class=\"List\">\n        <div id=\"no-items\" v-if=\"tasks.length == 0\">You do not have any items in the list.</div>\n        <div class=\"Task-Item\" v-for=\"task in tasks\" :class=\"{ 'Task-Item--running': task.isRunning }\">\n            <input type=\"checkbox\" :checked=\"task.isComplete\" v-on:click=\"changeComplete(task)\" />\n            <div class=\"Task-Name\">{{ task.title }}</div>\n            <div class=\"Task-Time\">{{ task.remainingTimeFormatted }}</div>\n            <button class=\"Task-Start\" v-if=\"!task.isRunning\" :disabled=\"task.isComplete\" v-on:click=\"task.start\">Start</button>\n            <button class=\"Task-Start\" v-if=\"task.isRunning\" v-on:click=\"task.stop\">Stop</button>\n            <button class=\"Task-Delete\" v-on:click=\"remove(task)\">Delete</button>\n        </div>\n    </div>\n    <div class=\"New-Item\">\n        <input type=\"text\" class=\"Task-Name\" placeholder=\"New task. 30min\" autofocus ref=\"taskName\" v-model=\"taskName\" v-on:keyup.enter=\"addTask\" />\n        <button id=\"Task-Add\" v-on:click=\"addTask\">Add</button>\n    </div>\n    <div class=\"Task-Stat\">\n        Incomplete\n        <span title=\"Planned\">{{formatTime(incompletePlaned, true)}}</span>/\n        <span title=\"Planned\">{{formatTime(incompleteSpent, true)}}</span> |\n        Complete\n        <span title=\"Planned\">{{formatTime(completedPlaned, true)}}</span>/\n        <span title=\"Planned\">{{formatTime(completedActual, true)}}</span>\n        <span title=\"Planned vs Actual\">{{formatTime(completedPlaned-completedActual, true)}}</span>\n    </div>\n    <div class=\"Controls\">\n        <button>Interrupt</button>\n        <button>Start Brake</button>\n        <button v-on:click=\"exportData\">Export</button>\n    </div>\n</div>\n";
+},{"./format-time.js":8}],14:[function(require,module,exports){
+module.exports = "<div class=\"Panel\">\n    <h1 class=\"Header\">Time Tracker</h1>\n    <div class=\"List\">\n        <div id=\"no-items\" v-if=\"tasks.length == 0\">You do not have any items in the list.</div>\n        <div class=\"Task-Item\" v-for=\"task in tasks\" :class=\"{ 'Task-Item--running': task.isRunning }\">\n            <input type=\"checkbox\" :checked=\"task.isComplete\" v-on:click=\"changeComplete(task)\" />\n            <group-selector v-bind:group=\"task.group\" v-on:group=\"task.updateGroup\"></group-selector>\n            <div class=\"Task-Name\">{{ task.title }}</div>\n            <div class=\"Task-Time\">{{ task.remainingTimeFormatted }}</div>\n            <button class=\"Task-Start\" v-if=\"!task.isRunning\" :disabled=\"task.isComplete\" v-on:click=\"task.start\">Start</button>\n            <button class=\"Task-Start\" v-if=\"task.isRunning\" v-on:click=\"task.stop\">Stop</button>\n            <button class=\"Task-Delete\" v-on:click=\"remove(task)\">Delete</button>\n        </div>\n    </div>\n    <div class=\"New-Item\">\n        <input type=\"text\" class=\"Task-Name\" placeholder=\"New task. 30min\" autofocus ref=\"taskName\" v-model=\"taskName\" v-on:keyup.enter=\"addTask\" />\n        <button id=\"Task-Add\" v-on:click=\"addTask\">Add</button>\n    </div>\n    <div class=\"Task-Stat\">\n        Incomplete\n        <span title=\"Planned\">{{formatTime(incompletePlaned, true)}}</span>/\n        <span title=\"Spent\">{{formatTime(incompleteSpent, true)}}</span> |\n        Complete\n        <span title=\"Planned\">{{formatTime(completedPlaned, true)}}</span>/\n        <span title=\"Actual\">{{formatTime(completedActual, true)}}</span>\n        <span title=\"Planned vs. Actual\">{{formatTime(completedPlaned-completedActual, true)}}</span>\n    </div>\n    <div class=\"Controls\">\n        <button>Interrupt</button>\n        <button>Start Brake</button>\n        <button v-on:click=\"exportData\">Export</button>\n    </div>\n</div>\n";
 
-},{}],13:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 'use strict';
 
 var _vue = require('vue');
@@ -747,6 +825,7 @@ _vue2.default.component('tasks', {
     createTask: function (taskData) {
       const taskModel = _task2.default.createTask(taskData);
       taskModel.addEventListener('start', e => this.saveTask(e));
+      taskModel.addEventListener('updateGroup', e => this.saveTask(e));
       taskModel.addEventListener('start', e => _notification2.default.setupNotifications(e.task));
       taskModel.addEventListener('stop', e => this.saveTask(e));
       taskModel.addEventListener('complete', e => this.saveTask(e));
@@ -759,7 +838,8 @@ _vue2.default.component('tasks', {
     },
     exportData: async function () {
       const data = await _storage2.default.exportData();
-      (0, _download2.default)(data, 'tasks.json');
+      const time = new Date();
+      (0, _download2.default)(data, `tasks-${time.getFullYear()}-${time.getMonth().toString().padStart(2, '0')}-${time.getDate().toString().padStart(2, '0')}-${time.getHours().toString().padStart(2, '0')}-${time.getMinutes().toString().padStart(2, '0')}-${time.getSeconds().toString().padStart(2, '0')}.json`);
     },
     saveTask: function ({ task }) {
       const data = task.getData();
@@ -798,7 +878,7 @@ _vue2.default.component('tasks', {
   }
 });
 
-},{"../download.js":4,"../storage.js":7,"./format-time.js":8,"./notification.js":9,"./parse-task-input":10,"./task.js":11,"./tasks.html":12,"vue":3}],14:[function(require,module,exports){
+},{"../download.js":4,"../storage.js":7,"./format-time.js":8,"./notification.js":11,"./parse-task-input":12,"./task.js":13,"./tasks.html":14,"vue":3}],16:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
