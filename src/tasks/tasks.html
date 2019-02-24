@@ -13,7 +13,8 @@
         </div>
     </div>
     <div class="New-Item">
-        <input type="text" class="Task-Name" placeholder="New task. 30min" autofocus ref="taskName" v-model="taskName" v-on:keyup.enter="addTask" />
+        <input type="text" class="Task-Name" placeholder="New task. 30min" autofocus
+            ref="taskName" v-model="taskName" v-on:keyup.enter="addTask" />
         <button id="Task-Add" v-on:click="addTask">Add</button>
     </div>
     <div class="Task-Stat">
@@ -24,6 +25,9 @@
         <span title="Planned">{{formatTime(completedPlaned, true)}}</span>/
         <span title="Actual">{{formatTime(completedActual, true)}}</span>
         <span title="Planned vs. Actual">{{formatTime(completedPlaned-completedActual, true)}}</span>
+    </div>
+    <div class="Task-Stat">
+        <progress-chart v-bind:tasks="tasks"></progress-chart>
     </div>
     <div class="Controls">
         <button>Interrupt</button>

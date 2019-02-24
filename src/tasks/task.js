@@ -26,7 +26,7 @@ function getData({ id, title, duration, startTime, remainingTime, isComplete, gr
     startTime,
     remainingTime,
     isComplete,
-    group: { name: group.name, color: group.color }
+    group: group && { name: group.name, color: group.color }
   };
 }
 
@@ -55,6 +55,7 @@ function createTask({
     updateGroup: []
   };
   const spentTime = duration - remainingTime;
+  group = group || null;
   const task = {
     id,
     isRunning,
