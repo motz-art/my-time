@@ -55,7 +55,7 @@ function createTask({
     updateGroup: []
   };
   const spentTime = duration - remainingTime;
-  group = group || null;
+  group = group || { color: '#88f', name: 'Work' };
   const task = {
     id,
     isRunning,
