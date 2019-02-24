@@ -300,6 +300,8 @@ require('./tasks/tasks.js');
 
 require('./tasks/group-selector.js');
 
+require('./tasks/progress-chart.js');
+
 var _vue = require('vue');
 
 var _vue2 = _interopRequireDefault(_vue);
@@ -315,7 +317,7 @@ var app = new _vue2.default({
   template: _main2.default
 });
 
-},{"./main.html":6,"./tasks/group-selector.js":10,"./tasks/tasks.js":15,"vue":3}],6:[function(require,module,exports){
+},{"./main.html":6,"./tasks/group-selector.js":10,"./tasks/progress-chart.js":14,"./tasks/tasks.js":17,"vue":3}],6:[function(require,module,exports){
 module.exports = "<tasks></tasks>\n";
 
 },{}],7:[function(require,module,exports){
@@ -534,7 +536,7 @@ function notify(task, remainingTime) {
 
 exports.default = { notify, setupNotifications };
 
-},{"./time-ico.js":16}],12:[function(require,module,exports){
+},{"./time-ico.js":18}],12:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -581,6 +583,83 @@ function parseTaskInput(name) {
 exports.default = parseTaskInput;
 
 },{}],13:[function(require,module,exports){
+module.exports = "<div class=\"chart\">\n    <canvas height=\"50\" width=\"600\" ref=\"canvas\"></canvas>\n</div>\n";
+
+},{}],14:[function(require,module,exports){
+'use strict';
+
+var _vue = require('vue');
+
+var _vue2 = _interopRequireDefault(_vue);
+
+var _progressChart = require('./progress-chart.html');
+
+var _progressChart2 = _interopRequireDefault(_progressChart);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_vue2.default.component('progress-chart', {
+  template: _progressChart2.default,
+  props: ['tasks'],
+  data: function () {
+    return {};
+  },
+  mounted: function () {
+    this.draw();
+  },
+  computed: {
+    timeData: function () {
+      return this.getTimeData();
+    }
+  },
+  watch: {
+    timeData: function () {
+      this.draw();
+    }
+  },
+  methods: {
+    getTimeData: function () {
+      const timeData = {};
+      if (Array.isArray(this.tasks)) {
+        this.tasks.forEach(task => {
+          const group = task.group || { name: '--', color: '#888' };
+          const data = timeData[group.name] || {
+            name: group.name,
+            color: group.color,
+            time: 0
+          };
+          data.time += task.duration;
+          timeData[group.name] = data;
+        });
+      }
+      return Object.values(timeData);
+    },
+    draw: function () {
+      const canvas = this.$refs.canvas;
+      if (!canvas) {
+        console.error('Canvas is not found!');
+        return;
+      }
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const timeData = this.getTimeData();
+      const total = Math.max(10, timeData.reduce((acc, item) => acc + item.time, 0));
+      console.log('draw', timeData, total);
+
+      let pos = 0;
+      for (let i = 0; i < timeData.length; i++) {
+        const data = timeData[i];
+        ctx.fillStyle = data.color;
+        const len = data.time / total * canvas.width;
+        ctx.fillRect(pos, 5, pos + len, 15);
+        pos += len;
+      }
+    }
+  }
+});
+
+},{"./progress-chart.html":13,"vue":3}],15:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -619,7 +698,7 @@ function getData({ id, title, duration, startTime, remainingTime, isComplete, gr
     startTime,
     remainingTime,
     isComplete,
-    group: { name: group.name, color: group.color }
+    group: group && { name: group.name, color: group.color }
   };
 }
 
@@ -648,6 +727,7 @@ function createTask({
     updateGroup: []
   };
   const spentTime = duration - remainingTime;
+  group = group || null;
   const task = {
     id,
     isRunning,
@@ -752,10 +832,10 @@ function createTask({
 
 exports.default = { createTask };
 
-},{"./format-time.js":8}],14:[function(require,module,exports){
-module.exports = "<div class=\"Panel\">\n    <h1 class=\"Header\">Time Tracker</h1>\n    <div class=\"List\">\n        <div id=\"no-items\" v-if=\"tasks.length == 0\">You do not have any items in the list.</div>\n        <div class=\"Task-Item\" v-for=\"task in tasks\" :class=\"{ 'Task-Item--running': task.isRunning }\">\n            <input type=\"checkbox\" :checked=\"task.isComplete\" v-on:click=\"changeComplete(task)\" />\n            <group-selector v-bind:group=\"task.group\" v-on:group=\"task.updateGroup\"></group-selector>\n            <div class=\"Task-Name\">{{ task.title }}</div>\n            <div class=\"Task-Time\">{{ task.remainingTimeFormatted }}</div>\n            <button class=\"Task-Start\" v-if=\"!task.isRunning\" :disabled=\"task.isComplete\" v-on:click=\"task.start\">Start</button>\n            <button class=\"Task-Start\" v-if=\"task.isRunning\" v-on:click=\"task.stop\">Stop</button>\n            <button class=\"Task-Delete\" v-on:click=\"remove(task)\">Delete</button>\n        </div>\n    </div>\n    <div class=\"New-Item\">\n        <input type=\"text\" class=\"Task-Name\" placeholder=\"New task. 30min\" autofocus ref=\"taskName\" v-model=\"taskName\" v-on:keyup.enter=\"addTask\" />\n        <button id=\"Task-Add\" v-on:click=\"addTask\">Add</button>\n    </div>\n    <div class=\"Task-Stat\">\n        Incomplete\n        <span title=\"Planned\">{{formatTime(incompletePlaned, true)}}</span>/\n        <span title=\"Spent\">{{formatTime(incompleteSpent, true)}}</span> |\n        Complete\n        <span title=\"Planned\">{{formatTime(completedPlaned, true)}}</span>/\n        <span title=\"Actual\">{{formatTime(completedActual, true)}}</span>\n        <span title=\"Planned vs. Actual\">{{formatTime(completedPlaned-completedActual, true)}}</span>\n    </div>\n    <div class=\"Controls\">\n        <button>Interrupt</button>\n        <button>Start Brake</button>\n        <button v-on:click=\"exportData\">Export</button>\n    </div>\n</div>\n";
+},{"./format-time.js":8}],16:[function(require,module,exports){
+module.exports = "<div class=\"Panel\">\n    <h1 class=\"Header\">Time Tracker</h1>\n    <div class=\"List\">\n        <div id=\"no-items\" v-if=\"tasks.length == 0\">You do not have any items in the list.</div>\n        <div class=\"Task-Item\" v-for=\"task in tasks\" :class=\"{ 'Task-Item--running': task.isRunning }\">\n            <input type=\"checkbox\" :checked=\"task.isComplete\" v-on:click=\"changeComplete(task)\" />\n            <group-selector v-bind:group=\"task.group\" v-on:group=\"task.updateGroup\"></group-selector>\n            <div class=\"Task-Name\">{{ task.title }}</div>\n            <div class=\"Task-Time\">{{ task.remainingTimeFormatted }}</div>\n            <button class=\"Task-Start\" v-if=\"!task.isRunning\" :disabled=\"task.isComplete\" v-on:click=\"task.start\">Start</button>\n            <button class=\"Task-Start\" v-if=\"task.isRunning\" v-on:click=\"task.stop\">Stop</button>\n            <button class=\"Task-Delete\" v-on:click=\"remove(task)\">Delete</button>\n        </div>\n    </div>\n    <div class=\"New-Item\">\n        <input type=\"text\" class=\"Task-Name\" placeholder=\"New task. 30min\" autofocus\n            ref=\"taskName\" v-model=\"taskName\" v-on:keyup.enter=\"addTask\" />\n        <button id=\"Task-Add\" v-on:click=\"addTask\">Add</button>\n    </div>\n    <div class=\"Task-Stat\">\n        Incomplete\n        <span title=\"Planned\">{{formatTime(incompletePlaned, true)}}</span>/\n        <span title=\"Spent\">{{formatTime(incompleteSpent, true)}}</span> |\n        Complete\n        <span title=\"Planned\">{{formatTime(completedPlaned, true)}}</span>/\n        <span title=\"Actual\">{{formatTime(completedActual, true)}}</span>\n        <span title=\"Planned vs. Actual\">{{formatTime(completedPlaned-completedActual, true)}}</span>\n    </div>\n    <div class=\"Task-Stat\">\n        <progress-chart v-bind:tasks=\"tasks\"></progress-chart>\n    </div>\n    <div class=\"Controls\">\n        <button>Interrupt</button>\n        <button>Start Brake</button>\n        <button v-on:click=\"exportData\">Export</button>\n    </div>\n</div>\n";
 
-},{}],15:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 'use strict';
 
 var _vue = require('vue');
@@ -878,7 +958,7 @@ _vue2.default.component('tasks', {
   }
 });
 
-},{"../download.js":4,"../storage.js":7,"./format-time.js":8,"./notification.js":11,"./parse-task-input":12,"./task.js":13,"./tasks.html":14,"vue":3}],16:[function(require,module,exports){
+},{"../download.js":4,"../storage.js":7,"./format-time.js":8,"./notification.js":11,"./parse-task-input":12,"./task.js":15,"./tasks.html":16,"vue":3}],18:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
