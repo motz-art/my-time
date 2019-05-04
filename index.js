@@ -514,7 +514,9 @@ function showNotification(title, body, task) {
     // eslint-disable-next-line no-unused-vars
     const n = new Notification(title, {
       tag: task.id,
+      renotify: true,
       body: body,
+      silent: true,
       icon: (0, _timeIco2.default)({
         remainingTime: task.getRemainingTime(),
         totalTime: task.duration,
